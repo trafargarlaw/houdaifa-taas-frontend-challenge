@@ -42,9 +42,14 @@ export const useAuthentication = defineStore("authentication", {
           })
           .catch((err: any) => {
             this.clearToken();
-
             reject(err);
           });
+      });
+    },
+    logout() {
+      return new Promise<void>((resolve) => {
+        this.clearToken();
+        resolve();
       });
     },
   },
