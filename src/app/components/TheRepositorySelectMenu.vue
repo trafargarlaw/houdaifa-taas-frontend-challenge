@@ -58,7 +58,7 @@ export default defineComponent({
     });
     const matchingRepos: ComputedRef<Repository[]> = computed(
       (): Repository[] =>
-        repositoriesStore.repos?.filter((repo: any) =>
+        repositoriesStore.repos?.filter((repo: Repository) =>
           repo.name
             .toLowerCase()
             .includes(repositoriesStore.keywordRepository.toLowerCase())
@@ -74,12 +74,16 @@ export default defineComponent({
     onMounted(() => {
       window.addEventListener("click", handleClickOutside);
     });
-    const handleClickOutside = (event: any) => {
-      if (select.value == null || select.value.contains(event.target)) return;
+    const handleClickOutside = (event: Event) => {
+      if (
+        select.value == null ||
+        select.value.contains(event.target as HTMLElement)
+      )
+        return;
       repositoriesStore.showReposList = false;
     };
 
-    const updateSearch = (repo: any) => {
+    const updateSearch = (repo: Repository) => {
       //update search term and selected repo and hide liste
       repositoriesStore.keywordRepository = repo.name;
       repositoriesStore.selectedRepo = repo.name;

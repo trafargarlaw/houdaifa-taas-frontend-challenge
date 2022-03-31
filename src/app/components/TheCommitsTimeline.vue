@@ -39,6 +39,11 @@
       </ol>
     </div>
   </div>
+  <div class="bg-transparent h-8 my-2 flex items-center" ref="page-end">
+    <div class="w-full flex justify-center">
+      <BaseLoadingSpinner v-if="commitsStore.isCommitsLoading" />
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -71,6 +76,46 @@ export default defineComponent({
   computed: {
     formatedDate() {
       return (date: Date | string) => new Date(date).toString().slice(0, 15);
+    },
+  },
+  mounted() {
+    this.scollTrigger();
+  },
+  methods: {
+    scollTrigger() {
+      const observer = new IntersectionObserver(async (entries) => {
+        if (this.commitsStore.isCommitsLastPage) {
+          return;
+        }
+        if (
+          entries[0].intersectionRatio > 0 &&
+          this.commitsStore.commits?.length
+        ) {
+          this.commitsStore.isCommitsLoading = true;
+          const commits = await this.commitsStore
+            .getCommits(
+              this.userStore.username,
+              this.repositoriesStore.selectedRepo,
+              this.branchesStore.selectedBranch,
+              this.commitsStore.commitsPage + 1
+            )
+            .catch((err) => {
+              this.userStore.triggerAlert("error", err.response.data.message);
+              return;
+            });
+          this.commitsStore.isCommitsLoading = false;
+          if (commits.length) {
+            this.commitsStore.commits = [
+              ...this.commitsStore.commits,
+              ...this.commitsStore.mergeSameDate(commits),
+            ];
+            this.commitsStore.commitsPage += 1;
+          } else {
+            this.commitsStore.isCommitsLastPage = true;
+          }
+        }
+      });
+      observer.observe(this.$refs["page-end"] as HTMLDivElement);
     },
   },
 });

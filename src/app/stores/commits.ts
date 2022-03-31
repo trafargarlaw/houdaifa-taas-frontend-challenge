@@ -28,7 +28,7 @@ export const useCommits = defineStore("commits", {
     isCommitsLoading: false,
   }),
   actions: {
-    mergeSameDate(array: any[]) {
+    mergeSameDate(array: Commit[]) {
       // merge commits that were made in the same day into separate arrays
       const groupedCommits = array.reduce((acc, commit) => {
         const date = new Date(commit.commit.author.date);
@@ -41,7 +41,7 @@ export const useCommits = defineStore("commits", {
         }
         acc[dateString].push(commit); // push the commit to the array
         return acc;
-      }, {});
+      }, {} as { [key: string]: Commit[] });
 
       return Object.values(groupedCommits) as Array<Commit[]>;
     },

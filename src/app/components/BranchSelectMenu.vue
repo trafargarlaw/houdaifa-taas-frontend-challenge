@@ -94,8 +94,7 @@ export default defineComponent({
   },
   computed: {
     matchingBranches(): Branch[] {
-      console.log(this.branchesStore.branches);
-      return this.branchesStore.branches?.filter((branch: any) =>
+      return this.branchesStore.branches?.filter((branch: Branch) =>
         branch.name
           .toLowerCase()
           .includes(this.branchesStore.keywordBranch.toLowerCase())
@@ -103,10 +102,12 @@ export default defineComponent({
     },
   },
   methods: {
-    handleClickOutside: function (event: any) {
+    handleClickOutside: function (event: Event) {
       if (
         this.$refs.details == null ||
-        (this.$refs["details"] as HTMLDetailsElement).contains(event.target)
+        (this.$refs["details"] as HTMLDetailsElement).contains(
+          event.target as HTMLElement
+        )
       )
         return;
       (this.$refs["details"] as HTMLDetailsElement).removeAttribute("open");

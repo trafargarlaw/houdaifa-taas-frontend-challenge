@@ -5,6 +5,7 @@ import { useUser } from "./user";
 
 export interface Repository {
   name: string;
+  default_branch: string;
 }
 
 export const useRepositories = defineStore("repositories", {

@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { defineStore } from "pinia";
 import { LocationQueryValue } from "vue-router";
 import { useUser } from "../stores/user";
@@ -28,7 +28,7 @@ export const useAuthentication = defineStore("authentication", {
       return new Promise((resolve, reject) => {
         axios
           .get(`/api/auth?code=${code}`)
-          .then((res: any) => {
+          .then((res: AxiosResponse) => {
             if (res.data.access_token) {
               const token = res.data.access_token;
               localStorage.setItem("user-token", token); // store the token in localstorage
@@ -40,7 +40,7 @@ export const useAuthentication = defineStore("authentication", {
               reject(res.data.error);
             }
           })
-          .catch((err: any) => {
+          .catch((err: Error) => {
             this.clearToken();
             reject(err);
           });
