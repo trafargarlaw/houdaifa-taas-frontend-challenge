@@ -4,7 +4,7 @@ Simple Vue application to overview github repositories and commits history.
 
 ## Description
 
-This is a simple application for overviewing github repositories and commits hisitory using Vite, Vue3, TailwindCss for the frontend and simple express server for the backend to execute the github authentication request.
+This is a simple application for overviewing github repositories and commits hisitory using Vite, Vue3, pinia, TailwindCSS for the frontend and simple express server for the backend to execute the github authentication request.
 
 - The User authorizes his Github Account then he is able to list repositories with ability to filter by name, with autocomplete.
 
