@@ -1,6 +1,6 @@
 import express from "express";
-import path from "path";
 import router from "./lib/router";
+import path from "path";
 
 const { PORT = 3001 } = process.env;
 
