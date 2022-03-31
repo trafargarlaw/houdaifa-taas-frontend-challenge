@@ -41,6 +41,7 @@ import {
   watch,
 } from "vue";
 import { useBranches } from "../stores/branches";
+import { useCommits } from "../stores/commits";
 import { Repository, useRepositories } from "../stores/repositories";
 //export default to avoid import has no default export error
 export default defineComponent({
@@ -48,6 +49,7 @@ export default defineComponent({
   setup() {
     const repositoriesStore = useRepositories();
     const branchesStore = useBranches();
+    const commitsStore = useCommits();
     const select = ref<HTMLElement | null>(null);
     repositoriesStore.getRepos().then((result) => {
       if (!result.error) {
@@ -66,10 +68,10 @@ export default defineComponent({
       () => repositoriesStore.selectedRepo,
       async () => {
         branchesStore.refreshBranches();
+        commitsStore.refreshCommits();
       }
     );
     onMounted(() => {
-      console.log(select.value);
       window.addEventListener("click", handleClickOutside);
     });
     const handleClickOutside = (event: any) => {
@@ -82,6 +84,7 @@ export default defineComponent({
       repositoriesStore.keywordRepository = repo.name;
       repositoriesStore.selectedRepo = repo.name;
       repositoriesStore.showReposList = false;
+      branchesStore.default_branch = repo.default_branch;
     };
 
     return {
@@ -89,6 +92,8 @@ export default defineComponent({
       repositoriesStore,
       matchingRepos,
       updateSearch,
+      branchesStore,
+      commitsStore,
     };
   },
 });

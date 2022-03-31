@@ -12,6 +12,7 @@ export const useBranches = defineStore("branches", {
   state: () => ({
     selectedBranch: "",
     keywordBranch: "",
+    default_branch: "",
     branches: [] as Array<Branch>,
   }),
 
@@ -26,7 +27,7 @@ export const useBranches = defineStore("branches", {
       }).then((result) => result.data);
     },
     async refreshBranches() {
-      this.selectedBranch = "master";
+      this.selectedBranch = this.default_branch;
       const branches = await this.getBranches(
         useUser().username,
         useRepositories().selectedRepo

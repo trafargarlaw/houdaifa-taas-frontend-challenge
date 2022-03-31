@@ -73,13 +73,21 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useBranches, Branch } from "../stores/branches";
+import { useCommits } from "../stores/commits";
 export default defineComponent({
   name: "BranchSelectMenu",
   setup() {
+    const commitsStore = useCommits();
     const branchesStore = useBranches();
     return {
+      commitsStore,
       branchesStore,
     };
+  },
+  watch: {
+    async "branchesStore.selectedBranch"() {
+      this.commitsStore.refreshCommits();
+    },
   },
   mounted() {
     window.addEventListener("click", this.handleClickOutside);
