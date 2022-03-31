@@ -31,38 +31,65 @@
     </div>
   </div>
 </template>
-<script setup lang="ts">
-import { computed, ComputedRef, onMounted, ref } from "vue";
+<script lang="ts">
+import {
+  computed,
+  ComputedRef,
+  defineComponent,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
+import { useBranches } from "../stores/branches";
 import { Repository, useRepositories } from "../stores/repositories";
+//export default to avoid import has no default export error
+export default defineComponent({
+  name: "TheRepositorySelectMenu",
+  setup() {
+    const repositoriesStore = useRepositories();
+    const branchesStore = useBranches();
+    const select = ref<HTMLElement | null>(null);
+    repositoriesStore.getRepos().then((result) => {
+      if (!result.error) {
+        repositoriesStore.repos = result;
+      }
+    });
+    const matchingRepos: ComputedRef<Repository[]> = computed(
+      (): Repository[] =>
+        repositoriesStore.repos?.filter((repo: any) =>
+          repo.name
+            .toLowerCase()
+            .includes(repositoriesStore.keywordRepository.toLowerCase())
+        )
+    );
+    watch(
+      () => repositoriesStore.selectedRepo,
+      async () => {
+        branchesStore.refreshBranches();
+      }
+    );
+    onMounted(() => {
+      console.log(select.value);
+      window.addEventListener("click", handleClickOutside);
+    });
+    const handleClickOutside = (event: any) => {
+      if (select.value == null || select.value.contains(event.target)) return;
+      repositoriesStore.showReposList = false;
+    };
 
-const select = ref<HTMLElement | null>(null);
-const repositoriesStore = useRepositories();
+    const updateSearch = (repo: any) => {
+      //update search term and selected repo and hide liste
+      repositoriesStore.keywordRepository = repo.name;
+      repositoriesStore.selectedRepo = repo.name;
+      repositoriesStore.showReposList = false;
+    };
 
-repositoriesStore.getRepos().then((result) => {
-  if (!result.error) {
-    repositoriesStore.repos = result;
-  }
+    return {
+      select,
+      repositoriesStore,
+      matchingRepos,
+      updateSearch,
+    };
+  },
 });
-const matchingRepos: ComputedRef<Repository[]> = computed((): Repository[] =>
-  repositoriesStore.repos?.filter((repo: any) =>
-    repo.name
-      .toLowerCase()
-      .includes(repositoriesStore.keywordRepository.toLowerCase())
-  )
-);
-const handleClickOutside = (event: any) => {
-  if (select.value == null || select.value.contains(event.target)) return;
-  repositoriesStore.showReposList = false;
-};
-onMounted(() => {
-  console.log(select.value);
-  window.addEventListener("click", handleClickOutside);
-});
-
-const updateSearch = (repo: any) => {
-  //update search term and selected repo and hide liste
-  repositoriesStore.keywordRepository = repo.name;
-  repositoriesStore.selectedRepo = repo.name;
-  repositoriesStore.showReposList = false;
-};
 </script>

@@ -8,13 +8,15 @@
   </header>
 
   <TheRepositorySelectMenu />
+  <TheRepositoryContent />
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import BaseAlert from "../components/BaseAlert.vue";
-import TheRepositorySelectMenu from "../components/TheRepositorySelectMenu.vue";
 import UserProfile from "../components/UserProfile.vue";
+import TheRepositorySelectMenu from "../components/TheRepositorySelectMenu.vue";
+import TheRepositoryContent from "../components/TheRepositoryContent.vue";
 
 export default defineComponent({
   name: "Profile",
@@ -22,6 +24,7 @@ export default defineComponent({
     BaseAlert,
     TheRepositorySelectMenu,
     UserProfile,
+    TheRepositoryContent,
   },
 });
 </script>
