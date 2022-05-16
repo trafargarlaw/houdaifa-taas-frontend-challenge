@@ -30,7 +30,7 @@ npm install
 
 - Create an OAuth github application [Tutorial here](https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app)
 - set the homepage url to http://localhost:3000 and the callback url to http://localhost:3000/authentication
-- Make sure to set the client id and client secret (this one should stay private and secured) env variables from .env.template
+- Make sure to set the environment variables in the .env.template file
 - Rename .env.template into .env.local
 
 ### Executing program
