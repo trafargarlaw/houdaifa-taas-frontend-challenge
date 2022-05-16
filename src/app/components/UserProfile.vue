@@ -1,9 +1,7 @@
 <template>
   <!-- skeleton while loading for fun -->
-  <div v-if="userStore.userLoading">
-    <UserProfileSkeleton />
-  </div>
-  <div v-else class="flex justify-end items-center space-x-4">
+
+  <div class="flex justify-end items-center space-x-4">
     <div>
       <span class="text-gray-200 font-medium block">{{ userStore.name }}</span>
       <button class="text-gray-400 font-medium" @click="disconnect()">
@@ -21,7 +19,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthentication } from "../stores/authentication";
+import { AuthService } from "../services/AuthService";
 import { useUser } from "../stores/user";
 import UserProfileSkeleton from "./UserProfileSkeleton.vue";
 export default defineComponent({
@@ -30,38 +28,18 @@ export default defineComponent({
     UserProfileSkeleton,
   },
   setup() {
-    const authenticationStore = useAuthentication();
+    const authService = new AuthService();
     const userStore = useUser();
     const router = useRouter();
     const disconnect = () => {
-      authenticationStore.logout();
-      router.push("/");
-    };
-    userStore
-      .getUser()
-      .then((result) => {
-        if (!result.error) {
-          userStore.$patch({
-            name: result.name,
-            avatar: result.avatar_url,
-            username: result.login,
-          });
-        }
-      })
-      .catch((err) => {
-        userStore.triggerAlert("error", err.response.data.message);
-        return;
-      })
-      .finally(() => {
-        userStore.triggerAlert(
-          "success",
-          "Your Gihub account was successfully authorized"
-        );
-        userStore.userLoading = false;
+      authService.logout().then(async () => {
+        await router.push("/");
+        userStore.clearUser();
       });
+    };
     return {
       userStore,
-      authenticationStore,
+      authService,
       disconnect,
     };
   },
