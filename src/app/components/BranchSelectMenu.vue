@@ -72,7 +72,8 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { useBranches, Branch } from "../stores/branches";
+import { Branch } from "../services/BranchesService";
+import { useBranches } from "../stores/branches";
 import { useCommits } from "../stores/commits";
 export default defineComponent({
   name: "BranchSelectMenu",
@@ -86,7 +87,7 @@ export default defineComponent({
   },
   watch: {
     async "branchesStore.selectedBranch"() {
-      this.commitsStore.refreshCommits();
+      this.commitsStore.updateCommits();
     },
   },
   mounted() {
