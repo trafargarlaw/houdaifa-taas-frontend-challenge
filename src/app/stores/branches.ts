@@ -1,46 +1,41 @@
 import axios from "axios";
 import { defineStore } from "pinia";
-import { useAuthentication } from "./authentication";
+import { Branch, BranchesService } from "../services/BranchesService";
+import { useAlert } from "./alert";
 import { useRepositories } from "./repositories";
 import { useUser } from "./user";
 
-export interface Branch {
-  name: string;
+interface BranchState {
+  selectedBranch: string;
+  keywordBranch: string;
+  default_branch: string;
+  branches: Array<Branch>;
 }
 
+const BranchesS = new BranchesService();
+
 export const useBranches = defineStore("branches", {
-  state: () => ({
+  state: (): BranchState => ({
     selectedBranch: "",
     keywordBranch: "",
     default_branch: "",
-    branches: [] as Array<Branch>,
+    branches: [],
   }),
 
   actions: {
-    async getBranches(userLogin: string, repository: string) {
-      return axios({
-        url: `https://api.github.com/repos/${userLogin}/${repository}/branches`,
-        headers: {
-          Authorization: `token ${useAuthentication().token}`,
-        },
-        method: "GET",
-      }).then((result) => result.data);
-    },
-    async refreshBranches() {
+    async updateBranches() {
       this.selectedBranch = this.default_branch;
-      const branches = await this.getBranches(
-        useUser().username,
-        useRepositories().selectedRepo
-      ).catch((err) => {
-        useUser().triggerAlert("error", err.response.data.message);
-        return;
-      });
-      if (branches) {
+      try {
+        let username = useUser().username;
+        let selectedRepo = useRepositories().selectedRepo;
+        const branches = await BranchesS.getBranches(username, selectedRepo);
         this.branches = branches;
-      } else {
-        this.selectedBranch = "";
-        this.branches = [];
+      } catch (error) {
+        useAlert().triggerAlert("error", error);
       }
+    },
+    clearBranches() {
+      this.$reset();
     },
   },
 });

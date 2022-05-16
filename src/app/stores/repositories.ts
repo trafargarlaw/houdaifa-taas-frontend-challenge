@@ -1,35 +1,36 @@
 import axios from "axios";
 import { defineStore } from "pinia";
-import { useAuthentication } from "./authentication";
-import { useUser } from "./user";
+import { RepositoryService, Repository } from "../services/RepositoryService";
+import { useAlert } from "./alert";
 
-export interface Repository {
-  name: string;
-  default_branch: string;
+const repositoryS = new RepositoryService();
+
+interface StoreState {
+  showReposList: boolean;
+  keywordRepository: string;
+  selectedRepo: string;
+  repos: Array<Repository>;
 }
 
 export const useRepositories = defineStore("repositories", {
-  state: () => ({
+  state: (): StoreState => ({
     showReposList: false,
     keywordRepository: "",
     selectedRepo: "",
-    repos: [] as Array<Repository>,
+    repos: [],
   }),
-
   actions: {
-    async getRepos() {
-      return axios({
-        url: "https://api.github.com/user/repos",
-        headers: {
-          Authorization: `token ${useAuthentication().token}`,
-        },
-        method: "GET",
-      })
-        .then((result) => result.data)
+    async updateRepository() {
+      return repositoryS
+        .getRepositories()
+        .then((result) => (this.repos = result))
         .catch((err) => {
-          useUser().triggerAlert("error", err.response.data.message);
+          useAlert().triggerAlert("error", err);
           return;
         });
+    },
+    clearRepositories() {
+      this.$reset();
     },
   },
 });

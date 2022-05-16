@@ -1,6 +1,7 @@
 import axios from "axios";
 import { defineStore } from "pinia";
-import { useAuthentication } from "./authentication";
+import { CommitsService } from "../services/CommitsService";
+import { useAlert } from "./alert";
 import { useBranches } from "./branches";
 import { useRepositories } from "./repositories";
 import { useUser } from "./user";
@@ -19,6 +20,8 @@ export interface Commit {
     login: string;
   };
 }
+
+const commitsS = new CommitsService();
 
 export const useCommits = defineStore("commits", {
   state: () => ({
@@ -45,38 +48,51 @@ export const useCommits = defineStore("commits", {
 
       return Object.values(groupedCommits) as Array<Commit[]>;
     },
-    async getCommits(
-      userLogin: string,
-      repository: string,
-      branch?: string,
-      page?: number
-    ) {
-      return await axios({
-        url: `https://api.github.com/repos/${userLogin}/${repository}/commits?sha=${
-          branch || useBranches().default_branch
-        }&page=${page || 1}`,
-        headers: {
-          Authorization: `token ${useAuthentication().token}`,
-        },
-        method: "GET",
-      }).then((result) => {
-        return result.data;
-      });
-    },
-    async refreshCommits() {
+    async updateCommits() {
       this.isCommitsLastPage = false;
       this.commitsPage = 1;
-      const commits = await this.getCommits(
-        useUser().username,
-        useRepositories().selectedRepo,
-        useBranches().selectedBranch
-      ).catch((err) => {
-        useUser().triggerAlert("error", err.response.data.message);
-        return;
-      });
-      if (commits) {
+      try {
+        const commits = await commitsS.getCommits(
+          useUser().username,
+          useRepositories().selectedRepo,
+          useBranches().selectedBranch
+        );
         this.commits = this.mergeSameDate(commits);
-      } else this.commits = [];
+        if (commits.length < 30) {
+          this.isCommitsLastPage = true;
+        }
+      } catch (err) {
+        useAlert().triggerAlert(
+          "error",
+          "An error occured while getting commits"
+        );
+        this.commits = [];
+      }
+    },
+    async loadMoreCommits() {
+      if (this.isCommitsLastPage) {
+        return;
+      }
+      this.isCommitsLoading = true;
+      try {
+        const commits = await commitsS.getCommits(
+          useUser().username,
+          useRepositories().selectedRepo,
+          useBranches().selectedBranch,
+          this.commitsPage + 1
+        );
+        this.commits = [...this.commits, ...this.mergeSameDate(commits)];
+        this.commitsPage++;
+        if (commits.length === 0 || commits.length < 30) {
+          this.isCommitsLastPage = true;
+        }
+      } catch (err) {
+        useAlert().triggerAlert("error", err);
+      }
+      this.isCommitsLoading = false;
+    },
+    clearCommits() {
+      this.$reset();
     },
   },
 });
