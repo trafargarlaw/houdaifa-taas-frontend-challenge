@@ -48,6 +48,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
+import { useAlert } from "../stores/alert";
 import { useBranches } from "../stores/branches";
 import { useCommits } from "../stores/commits";
 import { useRepositories } from "../stores/repositories";
@@ -63,12 +64,14 @@ export default defineComponent({
   },
   data() {
     const commitsStore = useCommits();
+    const alertStore = useAlert();
     const userStore = useUser();
     const repositoriesStore = useRepositories();
     const branchesStore = useBranches();
     return {
       commitsStore,
       userStore,
+      alertStore,
       repositoriesStore,
       branchesStore,
     };
@@ -84,35 +87,11 @@ export default defineComponent({
   methods: {
     scollTrigger() {
       const observer = new IntersectionObserver(async (entries) => {
-        if (this.commitsStore.isCommitsLastPage) {
-          return;
-        }
         if (
           entries[0].intersectionRatio > 0 &&
           this.commitsStore.commits?.length
         ) {
-          this.commitsStore.isCommitsLoading = true;
-          const commits = await this.commitsStore
-            .getCommits(
-              this.userStore.username,
-              this.repositoriesStore.selectedRepo,
-              this.branchesStore.selectedBranch,
-              this.commitsStore.commitsPage + 1
-            )
-            .catch((err) => {
-              this.userStore.triggerAlert("error", err.response.data.message);
-              return;
-            });
-          this.commitsStore.isCommitsLoading = false;
-          if (commits.length) {
-            this.commitsStore.commits = [
-              ...this.commitsStore.commits,
-              ...this.commitsStore.mergeSameDate(commits),
-            ];
-            this.commitsStore.commitsPage += 1;
-          } else {
-            this.commitsStore.isCommitsLastPage = true;
-          }
+          this.commitsStore.loadMoreCommits();
         }
       });
       observer.observe(this.$refs["page-end"] as HTMLDivElement);
