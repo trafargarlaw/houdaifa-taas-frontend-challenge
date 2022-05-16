@@ -25,12 +25,8 @@ export default defineComponent({
   setup() {
     const branchesStore = useBranches();
     const repositoriesStore = useRepositories();
+    repositoriesStore.updateRepository();
 
-    repositoriesStore.getRepos().then((result) => {
-      if (!result.error) {
-        repositoriesStore.repos = result;
-      }
-    });
     return {
       branchesStore,
       repositoriesStore,
