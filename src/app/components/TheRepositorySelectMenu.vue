@@ -1,5 +1,5 @@
 <template>
-  <div class="mx-4 relative" ref="select">
+  <div class="mx-4 relative" v-click-outside="handleClickOutside">
     <span
       @click="
         repositoriesStore.showReposList = !repositoriesStore.showReposList
@@ -42,7 +42,9 @@ import {
 } from "vue";
 import { useBranches } from "../stores/branches";
 import { useCommits } from "../stores/commits";
-import { Repository, useRepositories } from "../stores/repositories";
+import { useRepositories } from "../stores/repositories";
+import { Repository } from "../services/RepositoryService";
+import { useUser } from "../stores/user";
 //export default to avoid import has no default export error
 export default defineComponent({
   name: "TheRepositorySelectMenu",
@@ -50,12 +52,9 @@ export default defineComponent({
     const repositoriesStore = useRepositories();
     const branchesStore = useBranches();
     const commitsStore = useCommits();
+    const userStore = useUser();
     const select = ref<HTMLElement | null>(null);
-    repositoriesStore.getRepos().then((result) => {
-      if (!result.error) {
-        repositoriesStore.repos = result;
-      }
-    });
+    repositoriesStore.updateRepository();
     const matchingRepos: ComputedRef<Repository[]> = computed(
       (): Repository[] =>
         repositoriesStore.repos?.filter((repo: Repository) =>
@@ -67,22 +66,13 @@ export default defineComponent({
     watch(
       () => repositoriesStore.selectedRepo,
       async () => {
-        branchesStore.refreshBranches();
-        commitsStore.refreshCommits();
+        branchesStore.updateBranches();
+        commitsStore.updateCommits();
       }
     );
-    onMounted(() => {
-      window.addEventListener("click", handleClickOutside);
-    });
     const handleClickOutside = (event: Event) => {
-      if (
-        select.value == null ||
-        select.value.contains(event.target as HTMLElement)
-      )
-        return;
       repositoriesStore.showReposList = false;
     };
-
     const updateSearch = (repo: Repository) => {
       //update search term and selected repo and hide liste
       repositoriesStore.keywordRepository = repo.name;
@@ -98,6 +88,7 @@ export default defineComponent({
       updateSearch,
       branchesStore,
       commitsStore,
+      handleClickOutside,
     };
   },
 });
