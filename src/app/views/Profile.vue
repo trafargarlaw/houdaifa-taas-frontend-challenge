@@ -1,14 +1,12 @@
 <template>
-  <transition name="alert">
-    <BaseAlert />
-  </transition>
-
+  <BaseAlert />
   <header class="px-4 pt-2 mb-3">
     <UserProfile />
   </header>
-
-  <TheRepositorySelectMenu />
-  <TheRepositoryContent />
+  <main>
+    <TheRepositorySelectMenu />
+    <TheRepositoryContent />
+  </main>
 </template>
 
 <script lang="ts">
@@ -28,30 +26,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style>
-/* enter classes */
-.alert-enter-from {
-  opacity: 0;
-  transform: translateX(-60px);
-}
-.alert-enter-to {
-  opacity: 1;
-  transform: translateX(0);
-}
-.alert-enter-active {
-  transition: all 300ms ease;
-}
-/* leave classes */
-.alert-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
-.alert-leave-to {
-  opacity: 0;
-  transform: translateX(-60px);
-}
-.alert-leave-active {
-  transition: all 300ms ease;
-}
-</style>

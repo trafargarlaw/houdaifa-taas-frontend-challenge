@@ -10,22 +10,26 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import BaseLoadingSpinner from "../components/BaseLoadingSpinner.vue";
-import { useAuthentication } from "../stores/authentication";
+import { AuthService } from "../services/AuthService";
 
 export default defineComponent({
   name: "profile",
   components: { BaseLoadingSpinner },
   setup() {
-    const { authentify } = useAuthentication();
+    const { authentify } = new AuthService();
+
     return {
       authentify,
     };
   },
   async mounted() {
-    await this.authentify(this.$route.query.code).catch((err) => {
-      this.$router.push("/");
-    });
-    await this.$router.push("/profile");
+    await this.authentify(this.$route.query.code)
+      .then(() => {
+        this.$router.push("/profile");
+      })
+      .catch((err) => {
+        this.$router.push("/");
+      });
   },
 });
 </script>
